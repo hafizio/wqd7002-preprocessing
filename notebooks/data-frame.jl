@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.14.2
 
 using Markdown
 using InteractiveUtils
@@ -18,7 +18,7 @@ begin
 end
 
 # ╔═╡ 1d6ae802-532a-11eb-370b-33068dc87e37
-job_posting = CSV.read("./job_postings_normalized.csv", DataFrame)
+job_posting = CSV.read("../wqd7002-web-scraper/output/job_postings_normalized.csv", DataFrame)
 
 # ╔═╡ 0c7736d0-532b-11eb-1713-1967e9d88659
 job_posting_with_salary = dropmissing(job_posting, :salary_raw)

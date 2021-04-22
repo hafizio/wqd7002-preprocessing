@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.14.2
 
 using Markdown
 using InteractiveUtils
@@ -26,16 +26,17 @@ end
 
 # ╔═╡ ad101922-52a4-11eb-0e9a-ad57cd3d295d
 begin
-	f = open("./response-sg-my.jl")
+	# f = open("../../wqd7002-web-scraper/output/response-sg-my.jl")
+	f = open("../../wqd7002-web-scraper/output/response-au-copy.jl")
 	lines = readlines(f)
 	close(f)
 end
 
 # ╔═╡ 343da3b2-5e29-11eb-3398-5d4f4fc1e755
-sample = JSON.parse(lines[15])
+sample = JSON.parse(lines[10])
 
 # ╔═╡ b8f687dc-5310-11eb-2bbf-39781287d217
-sampleJobPosting = JSON.parse(lines[200])["jobPosting"]
+sampleJobPosting = JSON.parse(lines[10])["jobPosting"]
 
 # ╔═╡ 5c2e28be-5303-11eb-1d34-63ce6bffea19
 function get_salary_range(raw_salary_range)
@@ -43,6 +44,8 @@ function get_salary_range(raw_salary_range)
 	
 	salary_range = replace(raw_salary_range, [',',';',' '] => "")
 	
+	println(salary_range)
+
 	numbers = map(findall(pat, salary_range)) do range
 		if occursin("year", raw_salary_range)
     		parse(Float64, salary_range[range])/12
@@ -145,8 +148,8 @@ function convert_salary(original_currency, salary_amount)
 	elseif original_currency == "SGD"
 		# currency conversion from SGD 1 to MYR 
 		salary_amount * 3.04
-	elseif original_currency == "SGD"
-		# currency conversion from AUD 1 to MYR 
+	elseif original_currency == "AUD"
+		# currency conversion from AUD 1 to MYR
 		salary_amount * 3.12
 	end
 end
@@ -158,20 +161,24 @@ job_postings = map(lines) do line
 	
 	# url
 	url = get(posting, "url", "")
-	
+
 	# country
 	country = get_country_from_url(url)
-	
+		
 	# salary
 	salary = get(posting, "baseSalary", Dict())
+	# println(salary)
 	salary_range = get_salary_range(get(salary, "raw", "0-0"))
+	# println(salary_range)
 	salary_min = first(salary_range)
 	salary_max = last(salary_range)
 	
 	# salary currency
 	salary_currency = get(salary, "currency", "")
+	# println(salary_currency)
 	std_salary_currency = standardize_currency(country, salary_currency)
-	
+	# println(std_salary_currency)
+
 	# location
 	location = get(posting, "jobLocation", Dict())
 	
@@ -247,7 +254,7 @@ begin
 end
 
 # ╔═╡ 0af6dc82-5346-11eb-3708-534b25be53c3
-# CSV.write("job_posting_with_salary.csv", df_job_posting_with_salary)
+CSV.write("../output/job_posting_with_salary.csv", df_job_posting_with_salary)
 
 # ╔═╡ Cell order:
 # ╠═1f98610c-52a0-11eb-36a8-59dedc786f2f
