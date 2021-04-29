@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.2
+# v0.14.3
 
 using Markdown
 using InteractiveUtils
@@ -7,14 +7,14 @@ using InteractiveUtils
 # ╔═╡ 1f98610c-52a0-11eb-36a8-59dedc786f2f
 begin
 	import Pkg
-	
+
 	Pkg.add("CSV")
 	Pkg.add("JSON")
 	Pkg.add("DataFrames")
 	Pkg.add("DataFramesMeta")
 	Pkg.add("Dates")
 	Pkg.add("StatsPlots")
-	
+
 	using CSV
 	using JSON
 	using DataFrames
@@ -32,6 +32,9 @@ begin
 	close(f)
 end
 
+# ╔═╡ a3fefb5f-0b5d-418a-8b1d-42dfefa722fb
+pwd()
+
 # ╔═╡ 343da3b2-5e29-11eb-3398-5d4f4fc1e755
 sample = JSON.parse(lines[10])
 
@@ -41,9 +44,9 @@ sampleJobPosting = JSON.parse(lines[10])["jobPosting"]
 # ╔═╡ 5c2e28be-5303-11eb-1d34-63ce6bffea19
 function get_salary_range(raw_salary_range)
 	pat = r"[+]?\d+\.?\d*"
-	
+
 	salary_range = replace(raw_salary_range, [',',';',' '] => "")
-	
+
 	println(salary_range)
 
 	numbers = map(findall(pat, salary_range)) do range
@@ -53,7 +56,7 @@ function get_salary_range(raw_salary_range)
     		parse(Float64, salary_range[range])/12
 		else
 			monthly_salary = parse(Float64, salary_range[range])
-			
+
 			# we assume that the company forgot to define that it's a yearly value
 			if monthly_salary > 100000.0
 				parse(Float64, salary_range[range])/12
@@ -146,7 +149,7 @@ function convert_salary(original_currency, salary_amount)
 	elseif original_currency == "MYR"
 		salary_amount
 	elseif original_currency == "SGD"
-		# currency conversion from SGD 1 to MYR 
+		# currency conversion from SGD 1 to MYR
 		salary_amount * 3.04
 	elseif original_currency == "AUD"
 		# currency conversion from AUD 1 to MYR
@@ -158,13 +161,13 @@ end
 job_postings = map(lines) do line
 	# main posting
 	posting = get(JSON.parse(line), "jobPosting", Dict())
-	
+
 	# url
 	url = get(posting, "url", "")
 
 	# country
 	country = get_country_from_url(url)
-		
+
 	# salary
 	salary = get(posting, "baseSalary", Dict())
 	# println(salary)
@@ -172,7 +175,7 @@ job_postings = map(lines) do line
 	# println(salary_range)
 	salary_min = first(salary_range)
 	salary_max = last(salary_range)
-	
+
 	# salary currency
 	salary_currency = get(salary, "currency", "")
 	# println(salary_currency)
@@ -181,14 +184,14 @@ job_postings = map(lines) do line
 
 	# location
 	location = get(posting, "jobLocation", Dict())
-	
+
 	# company
 	company = get(posting, "hiringOrganization", Dict())
-	
+
 	# year posted
 	date = get(posting, "datePosted", "")
 	year_posted = get_year_from_date_posted(date)
-	
+
 	Dict(
 		"url" => url,
 		"title" => get(posting, "title", missing),
@@ -245,7 +248,7 @@ mean(df_job_posting_with_salary[!,:salary_max])
 # ╔═╡ 3486a1a8-5338-11eb-0277-492beda3e54c
 begin
 	gr(size=(900,900))
-	
+
 	@df df_job_posting_with_salary scatter(
 	    :salary_converted_min,
 	    :salary_converted_max,
@@ -259,6 +262,7 @@ CSV.write("../output/job_posting_with_salary.csv", df_job_posting_with_salary)
 # ╔═╡ Cell order:
 # ╠═1f98610c-52a0-11eb-36a8-59dedc786f2f
 # ╠═ad101922-52a4-11eb-0e9a-ad57cd3d295d
+# ╠═a3fefb5f-0b5d-418a-8b1d-42dfefa722fb
 # ╠═343da3b2-5e29-11eb-3398-5d4f4fc1e755
 # ╠═b8f687dc-5310-11eb-2bbf-39781287d217
 # ╠═5c2e28be-5303-11eb-1d34-63ce6bffea19
