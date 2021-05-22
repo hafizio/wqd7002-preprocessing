@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.3
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -26,10 +26,16 @@ end
 
 # ╔═╡ ad101922-52a4-11eb-0e9a-ad57cd3d295d
 begin
-	# f = open("../../wqd7002-web-scraper/output/response-sg-my.jl")
-	f = open("../../wqd7002-web-scraper/output/response-au-copy.jl")
-	lines = readlines(f)
-	close(f)
+	fa = open("../../wqd7002-web-scraper/output/response-sg-my.jl")
+	fb = open("../../wqd7002-web-scraper/output/response-au.jl")
+
+	a_lines = readlines(fa)
+	b_lines = readlines(fb)
+	
+	lines = cat(a_lines, b_lines, dims = 1)
+	
+	close(fa)
+	close(fb)
 end
 
 # ╔═╡ a3fefb5f-0b5d-418a-8b1d-42dfefa722fb
@@ -164,7 +170,7 @@ job_postings = map(lines) do line
 
 	# url
 	url = get(posting, "url", "")
-
+	
 	# country
 	country = get_country_from_url(url)
 
@@ -172,7 +178,11 @@ job_postings = map(lines) do line
 	salary = get(posting, "baseSalary", Dict())
 	# println(salary)
 	salary_range = get_salary_range(get(salary, "raw", "0-0"))
-	# println(salary_range)
+	
+	if salary_range == []
+		salary_range = [0.0, 0.0]
+	end
+	
 	salary_min = first(salary_range)
 	salary_max = last(salary_range)
 
@@ -258,6 +268,7 @@ end
 
 # ╔═╡ 0af6dc82-5346-11eb-3708-534b25be53c3
 CSV.write("../output/job_posting_with_salary.csv", df_job_posting_with_salary)
+#CSV.write("../output/sg_my_job_posting_with_salary.csv", df_job_posting_with_salary)
 
 # ╔═╡ Cell order:
 # ╠═1f98610c-52a0-11eb-36a8-59dedc786f2f
